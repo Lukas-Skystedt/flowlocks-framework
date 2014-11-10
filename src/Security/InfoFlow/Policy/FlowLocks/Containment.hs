@@ -109,7 +109,8 @@ instance (Eq name, Eq var, ActorSet m actset aid, Show name, Show var) =>
                  let --subi :: VarPolicy var name actset -> Policy name actset -> m (VarPolicy var name actset)
                      subi pol x = substVarPolicyM i x pol
                      -- bound :: Policy name actset
-                     bound = top -- WITH BOUNDS: maybe top id $ lookup i bs
+                 bound <- topM -- WITH BOUNDS: maybe top id $ lookup i bs
+                 bottom <- bottomM
                  [[pb,pt],[qb,qt]] <-
                          mapM (\y -> mapM (subi y) [bottom, bound]) [p,q]
                  ap1 <- lrt gpol ls pb qb

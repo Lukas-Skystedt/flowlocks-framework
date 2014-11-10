@@ -212,7 +212,7 @@ instance (Eq name, JoinSemiLattice m actset) =>
   -- We can form a top element by appealing to that
   -- from the underlying domain of actor sets,
   -- which must be isomorphic to the empty set.
-  top = Clause top [] []
+  topM = topM >>= \t -> return $ Clause t [] []
 
   -- ... but any clause with a head that is 
   -- isomorphic to the empty set is semantically
@@ -260,7 +260,7 @@ instance (Eq name, JoinSemiLattice m actset) =>
       allNonTop <- filterM ((liftM not) . mustBeTop) cartProd
       return $ Policy allNonTop
 
-  top = Policy []
+  topM = return $ Policy []
   -- A policy can be equivalent to 'top' even if
   -- is not identical -
   -- it suffices that the heads of all clauses are 'top'
@@ -293,7 +293,7 @@ instance (Eq name, Lattice m actset) =>
   -- If the actor set has a bottom element, we can
   -- form the bottom element of the policy lattice,
   -- as discussed above.
-  bottom = Policy [Clause bottom [] []]
+  bottomM = bottomM >>= (\b -> return $ Policy [Clause b [] []])
 
   -- isBottom is the default instantiation
 
@@ -578,7 +578,7 @@ instance (Eq name, Eq var, Lattice m actset) =>
               (isTop p,    return p),
               (isTop q,    return q)] $ return $ Join p q
 
-  top = ConcretePolicy top
+  topM = topM >>= return . ConcretePolicy
 
   -- We cannot in general decide whether a
   -- policy with variables is top or not,
@@ -603,7 +603,7 @@ instance (Eq name, Eq var, Lattice m actset) =>
   -- We cannot in general decide whether a
   -- policy with variables is top or not,
   -- so this operation is considered "unsafe".
-  bottom = ConcretePolicy bottom
+  bottomM = bottomM >>= return . ConcretePolicy
   isBottom (ConcretePolicy p) = isBottom p
   isBottom _ = return Nothing
 
@@ -703,7 +703,7 @@ instance (Eq name, Eq var, Eq mvar, Lattice m actset) =>
              (isTop q, return q)]
             $ return $ MetaJoin p q
 
-  top = VarPolicy top
+  topM = topM >>= return . VarPolicy
   isTop (VarPolicy p) = isTop p
   isTop _ = return Nothing
 
@@ -721,7 +721,7 @@ instance (Eq name, Eq var, Eq mvar, Lattice m actset) =>
              (isBottom q, return q)]
             $ return $ MetaMeet p q
 
-  bottom = VarPolicy bottom
+  bottomM = bottomM >>= return . VarPolicy
   isBottom (VarPolicy p) = isBottom p
   isBottom _ = return Nothing
 

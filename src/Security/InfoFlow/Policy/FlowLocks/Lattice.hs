@@ -22,8 +22,6 @@ module Security.InfoFlow.Policy.FlowLocks.Lattice
      -- * Further operations
      geq, mayBeTop, mustBeTop, mayBeBottom, mustBeBottom,
 
-     topM, bottomM,
-
      -- * Convenient helpers
      forall, exists
 
@@ -33,7 +31,7 @@ import Control.Monad (liftM)
 import Control.Applicative
 
 class (Eq point, Functor m, Applicative m, Monad m) =>
-    PartialOrder m point | point -> m where
+    PartialOrder m point where
   -- | Partial order operation
     leq :: point -> point -> m Bool
 
@@ -49,7 +47,7 @@ class PartialOrder m point =>
     -- | Least upper bound operation
     lub :: point -> point -> m point
     -- | Top element must exist
-    top  :: point
+    topM :: m point
 
     -- | Check if a given point is equivalent to 'top'.
     --   We allow it to be overridden for efficiency
@@ -59,18 +57,13 @@ class PartialOrder m point =>
     --   something *may* be top, and when something *is*
     --   top for certain.
     isTop :: point -> m (Maybe Bool)
-    isTop p = return $ Just (p == top)
+    isTop p = topM >>= \t -> return $ Just (p == t)
     
       
 -- | Reversed partial order operation
 geq :: PartialOrder m point => 
        point -> point -> m Bool
 geq = flip leq
-
--- | A monadic version of 'top', useful
---   in places where the @m@ parameter is ambiguous.
-topM :: JoinSemiLattice m point => m point
-topM = return top
 
 
 -- | Class representing a full lattice, to be used for
@@ -82,20 +75,14 @@ class JoinSemiLattice m point =>
     -- | Greatest lower bound operation
     glb :: point -> point -> m point
     -- | Bottom element must exist
-    bottom :: point
+    bottomM :: m point
 
     -- | Check if a given point is equivalent to 'bottom'.
     --   Can be overridden to provide more efficient 
     --   implementation.
     --   We use a three-valued logic just as for 'isTop'.
     isBottom :: point -> m (Maybe Bool)
-    isBottom p = return $ Just (p == bottom)
-
-
--- | A monadic version of 'top', useful
---   in places where the @m@ parameter is ambiguous.
-bottomM :: Lattice m point => m point
-bottomM = return bottom
+    isBottom p = bottomM >>= \b -> return $ Just (p == b)
 
 -- | Returns true if it is possible that the
 --   given value could be equivalent top 'top'

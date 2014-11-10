@@ -88,7 +88,7 @@ instance (Functor m, Monad m, Applicative m, ActorId aid) =>
 
 instance (Functor m, Monad m, Applicative m, ActorId aid) => 
           JoinSemiLattice m (ActorSetRep aid) where
-    top = NoActor
+    topM = return NoActor
 
     NoActor `lub` _ = return NoActor
     _ `lub` NoActor = return NoActor
@@ -102,7 +102,7 @@ instance (Functor m, Monad m, Applicative m, ActorId aid) =>
 
 instance (Functor m, Monad m, Applicative m, ActorId aid) => 
           Lattice m (ActorSetRep aid) where
-    bottom = AnyActor
+    bottomM = return AnyActor
 
     NoActor `glb` a = return a
     a `glb` NoActor = return a
