@@ -18,8 +18,9 @@ data Constraint mvar var name actset aid
   deriving (Eq, Show)
 
 
+-- NOTE FROM LUKAS: Added MonadFail constraint
 solve :: (Eq name, Eq mvar, Eq var, Ord mvar, Show mvar, Show var, Show name,
-          ActorSet m actset aid) =>
+          MonadFail m, ActorSet m actset aid) =>
          [Constraint mvar var name actset aid] -> m Bool
 solve [] = return True
 solve cs = do
@@ -194,9 +195,10 @@ substPol x (ls, px) (ls', CMetaVar y) =
     if x == y then Just (ls `union` ls', px) else Nothing
 substPol _ _ _ = Nothing
 
+-- NOTE FROM LUKAS: Added MonadFail constraint
 checkConstraint :: 
     (Eq name, Eq var, Eq mvar, Show name, Show var, Show mvar,
-     ActorSet m actset aid) => 
+     MonadFail m, ActorSet m actset aid) => 
     ConstraintNF mvar var name actset aid -> m Bool
 checkConstraint ~(LRTNF g ls (CVarPolicy p) (CVarPolicy q)) =
     lrt g ls p q

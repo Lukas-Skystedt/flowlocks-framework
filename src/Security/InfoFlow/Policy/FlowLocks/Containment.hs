@@ -61,8 +61,8 @@ class (Eq name, Eq mvar, Eq var, ActorSet m actset aid) =>
       b <- lrt g ls p q
       return $ Left b
 -}
-
-instance (Eq name, ActorSet m actset aid, Show name) =>
+-- NOTE FROM LUKAS: Added MonadFail constraint
+instance (Eq name, MonadFail m, ActorSet m actset aid, Show name) =>
     Containment m (Policy name actset) name actset aid where
 
   lrt gpol ls (Policy _p) (Policy _q) = do
@@ -80,7 +80,8 @@ instance (Eq name, ActorSet m actset aid, Show name) =>
       asetRel <- DatalogC.generateActSetRel asets
       return $ Datalog.uniformContained qD (pD ++ asetRel) (sFacts ++ lsD)
 
-instance (Eq name, Eq var, ActorSet m actset aid, Show name, Show var) =>
+-- NOTE FROM LUKAS: Added MonadFail constraint
+instance (Eq name, Eq var, MonadFail m, ActorSet m actset aid, Show name, Show var) =>
     Containment m (VarPolicy var name actset) name actset aid where
 
   lrt gpol ls p q =
@@ -132,7 +133,7 @@ instance (Eq name, Eq var, ActorSet m actset aid, Show name, Show var) =>
 
 instance (Eq name, Eq var, Eq mvar, 
           Show name, Show var, Show mvar,
-          ActorSet m actset aid) =>
+          MonadFail m, ActorSet m actset aid) =>
 --          Containment m (VarPolicy var name actset) mvar var name actset aid) =>
     ConstraintContainment m (MetaPolicy mvar var name actset) mvar var name actset aid where
 
